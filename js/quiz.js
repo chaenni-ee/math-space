@@ -12,7 +12,7 @@ const Quiz = (() => {
     const box = $('#quiz-card');
     box.innerHTML = '';
     box.classList.toggle('draw-card', p.type === 'draw');
-    box.append(el('div', 'quiz-tag', (reason === 'gift' ? '🎁 선물상자 문제!' : '❄️ 눈보라 문제!') + (p.tag ? ' · 📚 ' + p.tag : '')));
+    box.append(el('div', 'quiz-tag', (reason === 'gift' ? '❓ 미스터리 캡슐 문제!' : '📡 우주 통신 문제!') + (p.tag ? ' · 📚 ' + p.tag : '')));
     box.append(el('div', 'quiz-text', p.text + (p.multi ? ' <span class="multi">(정답 여러 개)</span>' : '')));
     const main = el('div', 'quiz-main' + (p.figure && p.type !== 'mc' && p.type !== 'tap' ? ' side' : ''));
     if (p.figure) main.append(el('div', 'quiz-fig', p.figure));

@@ -15,5 +15,5 @@ window.LESSONS = [
   { id: '3', no: '3차시', title: '직육면체의 성질', sub: '평행한 면 · 수직인 면', icon: '📐', ready: true },
   { id: '4', no: '4차시', title: '정육면체의 전개도', sub: '펼치고 접기', icon: '🎁', ready: true },
   { id: '5', no: '5차시', title: '직육면체의 전개도', sub: '맞닿는 모서리', icon: '📦', ready: true },
-  { id: 'final', no: '단원 평가', title: '눈괴물 대장전', sub: '열린 차시 문제 모두 · 대왕 괴물 자주 등장', icon: '👑', ready: true },
+  { id: 'final', no: '단원 평가', title: '외계인 대장전', sub: '열린 차시 문제 모두 · 대왕 외계인 자주 등장', icon: '👑', ready: true },
 ];

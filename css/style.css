@@ -237,3 +237,17 @@ h2 { font-size: 30px; }
 .bd-bar div { height: 100%; background: linear-gradient(90deg, #4fd1a5, #22a565); }
 .bd-num { text-align: right; color: #2a5aa8; font-family: var(--title); }
 @media (max-width: 520px) { .bd-row { grid-template-columns: 1fr 70px 40px; } }
+
+/* ===== 우주 테마 (픽셀 슈팅) ===== */
+#bg { background: #12082e; }
+canvas#game { image-rendering: pixelated; image-rendering: crisp-edges; cursor: none; }
+#screen-title { background: linear-gradient(180deg, rgba(10,4,30,0) 40%, rgba(10,4,30,0.5)); }
+.title-ship { position: absolute; left: 50%; top: -128px; width: 84px; image-rendering: pixelated; transform: translateX(-50%);
+  filter: drop-shadow(0 10px 14px rgba(20,0,60,0.5)); animation: bob 2.4s ease-in-out infinite; pointer-events: none; }
+@media (max-height: 720px) { .title-ship { width: 68px; top: -104px; } }
+.logo { background: linear-gradient(180deg, #8f6bff, #4a2ad0); -webkit-background-clip: text; background-clip: text; }
+.logo-sub { background: linear-gradient(90deg, #ece4ff, #f4efff); color: #5a35c0; border-color: #ddd0ff; }
+.how { background: rgba(238,232,255,0.85); }
+.how b { color: #5a35c0; }
+#countdown { filter: drop-shadow(0 6px 0 #5a35c0) drop-shadow(0 0 30px rgba(170,130,255,0.8)); }
+.hud-chip, .lives, .quiz-timer, .power { background: rgba(26, 10, 66, 0.6); }

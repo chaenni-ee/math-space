@@ -36,7 +36,7 @@
     onFrame: hud,
     onError: () => {
       const d = document.createElement('div'); d.className = 'err-box';
-      d.innerHTML = '3D 그래픽을 불러오지 못했어요.<br>인터넷 연결을 확인하고 새로고침해 주세요.';
+      d.innerHTML = '게임 화면을 불러오지 못했어요.<br>새로고침해 주세요.';
       document.body.append(d);
     },
   });
@@ -53,12 +53,12 @@
     const pct = Math.max(0, Math.min(100, 100 - st.quizT / (st.quizInterval || APP_CONFIG.QUIZ_INTERVAL) * 100));
     $('#hud-quizbar').style.width = pct + '%';
     const pw = [];
-    if (st.freeze > 0) pw.push('🧊 ' + Math.ceil(st.freeze));
+    if (st.freeze > 0) pw.push('⏸️ ' + Math.ceil(st.freeze));
     if (st.triple > 0) pw.push('🔱 ' + Math.ceil(st.triple));
     if (st.rapid > 0) pw.push('⚡ ' + Math.ceil(st.rapid));
-    if (st.slow > 0) pw.push('🐢 ' + Math.ceil(st.slow));
-    if (st.rage > 0) pw.push('🔥 분노 폭주 ×' + (st.anger * 1.5).toFixed(1) + ' · ' + Math.ceil(st.rage) + '초');
-    else if (st.anger > 1.01) pw.push('😡 ×' + st.anger.toFixed(1));
+    if (st.shield > 0) pw.push('🛡️ ' + Math.ceil(st.shield));
+    if (st.rage > 0) pw.push('🚨 비상 경보 · ' + Math.ceil(st.rage) + '초');
+    else if (st.anger > 1.01) pw.push('👾 속도 ×' + st.anger.toFixed(1));
     setHtml('#hud-powers', pw.map(x => `<span class="power">${x}</span>`).join(''));
   }
 
@@ -161,7 +161,7 @@
     const best = Store.get('best', {});
     const isBest = res.score > (best[lesson.id] || 0);
     if (isBest) { best[lesson.id] = res.score; Store.set('best', best); }
-    $('.over-title').textContent = isBest && res.score > 0 ? '🎉 내 최고 기록이에요!' : '기지가 눈에 파묻혔어요! ☃️';
+    $('.over-title').textContent = isBest && res.score > 0 ? '🎉 내 최고 기록이에요!' : '우주선이 고장 났어요! 💫';
     $('#rank-title').textContent = `🏆 ${lesson.no} 랭킹`;
     // 단원 평가: 차시별 정답률
     const bd = $('#res-breakdown');
