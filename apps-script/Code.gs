@@ -1,9 +1,11 @@
 /**
  * 눈뭉치 수학 대작전 - 기록 저장용 Apps Script
- * 구글 시트에서 [확장 프로그램] → [Apps Script]에 이 코드를 통째로 붙여 넣으세요.
+ * 구글 시트의 [확장 프로그램] → [Apps Script]에 붙여 넣으세요.
+ * (script.google.com 에서 따로 만들어도 돼요. setup 이 기록용 시트를 새로 만들어 줘요.)
  *
  * 1) 아래 ADMIN_PASSWORD를 원하는 비밀번호로 바꾸세요. (학생에게 보이지 않아요)
  * 2) 위쪽 함수 선택에서 setup 을 고르고 [실행] → 권한 허용  (시트 탭 3개가 만들어져요)
+ *    실행 로그에 나오는 '기록 시트 주소'를 눌러 시트를 확인하세요.
  * 3) [배포] → [새 배포] → 유형: 웹 앱
  *      - 실행 사용자: 나
  *      - 액세스 권한: 모든 사용자   ← 꼭 이것으로!
@@ -15,8 +17,24 @@ const LESSON_IDS = ['1', '2', '3', '4', '5', 'final'];
 const LESSON_NAMES = ['직육면체와 정육면체', '직육면체의 겨냥도', '직육면체의 성질', '정육면체의 전개도', '직육면체의 전개도', '단원 평가'];
 const SH_SET = '설정', SH_RANK = '랭킹', SH_LOG = '기록';
 
+// 기록할 스프레드시트 찾기
+//  - 시트의 [확장 프로그램 → Apps Script]로 만든 경우: 그 시트를 사용
+//  - script.google.com 에서 따로 만든 경우: setup 이 새 시트를 만들고 기억해 둠
+function ss_() {
+  const props = PropertiesService.getScriptProperties();
+  const id = props.getProperty('SHEET_ID');
+  if (id) return SpreadsheetApp.openById(id);
+  const active = SpreadsheetApp.getActive();
+  if (active) return active;
+  throw new Error('연결된 시트가 없어요. setup 을 먼저 실행하세요.');
+}
+
 function setup() {
-  const ss = SpreadsheetApp.getActive();
+  const props = PropertiesService.getScriptProperties();
+  let ss = SpreadsheetApp.getActive();
+  if (!ss && props.getProperty('SHEET_ID')) ss = SpreadsheetApp.openById(props.getProperty('SHEET_ID'));
+  if (!ss) ss = SpreadsheetApp.create('눈뭉치 수학 기록');
+  props.setProperty('SHEET_ID', ss.getId());
   let s = ss.getSheetByName(SH_SET) || ss.insertSheet(SH_SET);
   if (s.getLastRow() === 0) {
     s.appendRow(['차시ID', '차시 이름', '열림']);
@@ -27,13 +45,16 @@ function setup() {
   if (s.getLastRow() === 0) s.appendRow(['기록ID', '시간', '이름', '차시', '점수', '난이도', '맞힌 문제', '푼 문제', '버틴 시간(초)']);
   s = ss.getSheetByName(SH_LOG) || ss.insertSheet(SH_LOG);
   if (s.getLastRow() === 0) s.appendRow(['시간', '기록ID', '이름', '차시', '문제 유형', '정답 여부']);
+  const first = ss.getSheetByName('시트1') || ss.getSheetByName('Sheet1');
+  if (first && ss.getSheets().length > 3 && first.getLastRow() === 0) ss.deleteSheet(first);
+  Logger.log('✅ 준비 완료! 기록 시트 주소: ' + ss.getUrl());
 }
 
 function out_(obj) {
   return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(ContentService.MimeType.JSON);
 }
 function sheet_(name) {
-  const s = SpreadsheetApp.getActive().getSheetByName(name);
+  const s = ss_().getSheetByName(name);
   if (!s) throw new Error('시트 탭 "' + name + '"이 없어요. setup 을 먼저 실행하세요.');
   return s;
 }
