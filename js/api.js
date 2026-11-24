@@ -56,7 +56,8 @@ const Api = (() => {
   async function getSettings() {
     if (isMock()) return { open: mock.settings(), stale: false };
     try {
-      const j = await request('GET', { action: 'settings' });
+      // 구글 서버가 잠깐 느릴 때가 있어 한 번 더 시도
+      const j = await request('GET', { action: 'settings' }).catch(() => request('GET', { action: 'settings' }));
       Store.set('settings_cache', j.open);
       return { open: j.open, stale: false };
     } catch (e) {
@@ -92,7 +93,7 @@ const Api = (() => {
   async function getRanking(lesson) {
     if (isMock()) return { rows: sortTop(mock.rows(), lesson, 20), stale: false };
     try {
-      const j = await request('GET', { action: 'ranking', lesson });
+      const j = await request('GET', { action: 'ranking', lesson }).catch(() => request('GET', { action: 'ranking', lesson }));
       Store.set('rank_cache_' + lesson, j.rows);
       return { rows: j.rows, stale: false };
     } catch (e) {
