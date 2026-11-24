@@ -251,3 +251,7 @@ canvas#game { image-rendering: pixelated; image-rendering: crisp-edges; cursor: 
 .how b { color: #5a35c0; }
 #countdown { filter: drop-shadow(0 6px 0 #5a35c0) drop-shadow(0 0 30px rgba(170,130,255,0.8)); }
 .hud-chip, .lives, .quiz-timer, .power { background: rgba(26, 10, 66, 0.6); }
+.teacher-link { display: inline-block; font-family: var(--body); font-size: 14px; color: #7a6aa8; text-decoration: none; padding: 6px 12px; border-radius: 10px; border: 1px solid #ddd3f5; background: rgba(255,255,255,0.6); }
+.teacher-link:hover { background: #fff; color: #5a35c0; }
+#screen-title .teacher-link { position: absolute; right: 14px; bottom: 12px; }
+#screen-title .how { margin-bottom: 26px; }
