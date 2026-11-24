@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>선생님 관리 화면</title>
+<link rel="stylesheet" href="css/style.css?v=16">
+<style>
+  html, body { overflow: auto; background: linear-gradient(#0d1b3d, #2d4f8a) fixed; }
+  .wrap { max-width: 900px; margin: 0 auto; padding: 24px 16px 60px; }
+  .panel { width: 100%; text-align: left; margin-bottom: 18px; max-height: none; }
+  h1 { color: #fff; font-weight: normal; font-size: 32px; margin: 0 0 16px; }
+  .toggle-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 6px; border-bottom: 2px dashed #e1ecf8; font-size: 19px; }
+  .toggle-row:last-child { border: none; }
+  .toggle-row .ready { font-size: 13px; color: #c27c00; margin-left: 6px; }
+  .sw { position: relative; width: 74px; height: 38px; border-radius: 99px; border: none; background: #cfd8e3; transition: .2s; flex: none; }
+  .sw::after { content: '닫힘'; position: absolute; right: 8px; top: 9px; font-size: 14px; color: #fff; }
+  .sw::before { content: ''; position: absolute; left: 4px; top: 4px; width: 30px; height: 30px; border-radius: 50%; background: #fff; transition: .2s; }
+  .sw.on { background: #2bb673; }
+  .sw.on::after { content: '열림'; left: 10px; right: auto; }
+  .sw.on::before { left: 40px; }
+  .sw:disabled { opacity: .5; }
+  select { font-family: inherit; font-size: 18px; padding: 6px 10px; border-radius: 10px; border: 2px solid #cfe0f5; }
+  .rank-row { grid-template-columns: 40px 1fr 90px 90px 70px 44px; }
+  .del { background: #ffe1e8; border: none; border-radius: 8px; padding: 4px 8px; font-size: 15px; }
+  .stat-row { display: grid; grid-template-columns: 1fr 70px 160px; gap: 10px; align-items: center; padding: 6px 4px; font-size: 17px; }
+  .stat-bar { height: 12px; background: #ffe1e8; border-radius: 9px; overflow: hidden; }
+  .stat-bar div { height: 100%; background: #2bb673; }
+  .url-box { font-family: monospace; background: #f1f8ff; padding: 8px 10px; border-radius: 10px; word-break: break-all; font-size: 14px; user-select: text; -webkit-user-select: text; }
+  #login-err { color: #e5484d; min-height: 22px; }
+  #pw { width: 100%; font-family: inherit; font-size: 22px; padding: 10px 14px; border-radius: 12px; border: 3px solid #b9d7f3; margin: 8px 0; user-select: text; -webkit-user-select: text; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🧑‍🏫 선생님 관리 화면</h1>
+
+  <div class="panel" id="login-panel">
+    <h2>비밀번호</h2>
+    <p class="hint" id="mock-hint"></p>
+    <input type="password" id="pw" placeholder="관리자 비밀번호">
+    <div id="login-err"></div>
+    <button class="big-btn" id="btn-login">들어가기</button>
+  </div>
+
+  <div id="admin" class="hidden">
+    <div class="panel">
+      <h2>📚 차시 열기 / 닫기</h2>
+      <p class="hint">열어 둔 차시만 학생 화면에서 시작할 수 있어요. 학생은 [새로고침]을 누르면 바로 반영돼요.</p>
+      <div id="toggles"></div>
+    </div>
+
+    <div class="panel">
+      <div class="row-between"><h2>🏆 랭킹 · 기록</h2><select id="rank-lesson"></select></div>
+      <div id="admin-rank" class="rank-list" style="max-height:420px"></div>
+      <h3 style="margin-top:18px">📊 문제 유형별 정답률</h3>
+      <div id="admin-stats"></div>
+    </div>
+
+    <div class="panel">
+      <h2>🔗 학생 접속 주소</h2>
+      <div class="url-box" id="student-url"></div>
+      <div class="row-center"><button class="small-btn" id="btn-copy">주소 복사</button></div>
+    </div>
+  </div>
+</div>
+
+<script src="js/config.js?v=16"></script>
+<script src="js/api.js?v=16"></script>
+<script>
+(() => {
+  const $ = s => document.querySelector(s);
+  const esc = t => String(t).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  let pw = '';
+  if (Api.isMock()) $('#mock-hint').textContent = `테스트 모드예요. 비밀번호: ${Api.MOCK_PW} (이 기기 안에서만 바뀌어요)`;
+
+  $('#btn-login').onclick = async () => {
+    $('#login-err').textContent = '';
+    try { await Api.adminLogin($('#pw').value); pw = $('#pw').value; $('#login-panel').classList.add('hidden'); $('#admin').classList.remove('hidden'); load(); }
+    catch (e) { $('#login-err').textContent = e.message === '비밀번호가 달라요' || /password/i.test(e.message) ? '비밀번호가 달라요.' : '연결 오류: ' + e.message; }
+  };
+  $('#pw').addEventListener('keydown', e => { if (e.key === 'Enter') $('#btn-login').click(); });
+
+  async function load() {
+    const st = await Api.getSettings();
+    const box = $('#toggles'); box.innerHTML = '';
+    LESSONS.forEach(L => {
+      const row = document.createElement('div'); row.className = 'toggle-row';
+      row.innerHTML = `<span>${L.icon} ${L.no} · ${L.title}${L.ready ? '' : '<span class="ready">(게임 준비 중)</span>'}</span>`;
+      const sw = document.createElement('button'); sw.className = 'sw' + (st.open[L.id] ? ' on' : '');
+      sw.onclick = async () => {
+        const next = !sw.classList.contains('on');
+        sw.disabled = true;
+        try { await Api.adminSetOpen(pw, L.id, next); sw.classList.toggle('on', next); }
+        catch (e) { alert('바꾸지 못했어요: ' + e.message); }
+        sw.disabled = false;
+      };
+      row.append(sw); box.append(row);
+    });
+    const sel = $('#rank-lesson');
+    sel.innerHTML = LESSONS.map(L => `<option value="${L.id}">${L.no} · ${L.title}</option>`).join('');
+    sel.onchange = loadRank;
+    loadRank();
+    $('#student-url').textContent = location.href.replace(/admin\.html.*$/, '');
+  }
+
+  async function loadRank() {
+    const id = $('#rank-lesson').value;
+    const box = $('#admin-rank');
+    box.innerHTML = '<div class="rank-empty">불러오는 중…</div>';
+    const rk = await Api.getRanking(id);
+    if (!rk.rows.length) box.innerHTML = '<div class="rank-empty">아직 기록이 없어요.</div>';
+    else box.innerHTML = rk.rows.map((r, i) => `<div class="rank-row"><span>${i + 1}</span><span>${esc(r.name)}</span>
+      <span class="sc">${Number(r.score).toLocaleString()}점</span><span class="wv">정답 ${r.correct}/${r.total}</span><span class="wv">난이도 ${r.wave}</span>
+      <button class="del" data-id="${esc(r.id)}">🗑</button></div>`).join('');
+    box.querySelectorAll('.del').forEach(b => b.onclick = async () => {
+      if (!confirm('이 기록을 지울까요?')) return;
+      try { await Api.adminDeleteScore(pw, b.dataset.id); loadRank(); } catch (e) { alert('지우지 못했어요: ' + e.message); }
+    });
+    const sb = $('#admin-stats');
+    try {
+      const st = await Api.adminStats(pw, id);
+      const list = (st.stats || []).sort((a, b) => a.correct / a.total - b.correct / b.total);
+      sb.innerHTML = list.length ? list.map(s => {
+        const pct = Math.round(s.correct / s.total * 100);
+        return `<div class="stat-row"><span>${esc(s.type)}</span><span>${pct}%</span><div class="stat-bar"><div style="width:${pct}%"></div></div></div>`;
+      }).join('') : '<div class="rank-empty">아직 기록이 없어요.</div>';
+    } catch (e) { sb.innerHTML = '<div class="rank-empty">불러오지 못했어요.</div>'; }
+  }
+
+  $('#btn-copy').onclick = () => { navigator.clipboard.writeText($('#student-url').textContent).then(() => alert('복사했어요!')); };
+})();
+</script>
+</body>
+</html>

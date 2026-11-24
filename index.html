@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>눈뭉치 수학 대작전</title>
+<link rel="preload" href="fonts/Dunggeunmiso-B.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="css/style.css?v=16">
+</head>
+<body>
+<div id="bg"></div>
+<canvas id="game"></canvas>
+<canvas id="fx"></canvas>
+
+<!-- 시작 화면 -->
+<section id="screen-title" class="screen">
+  <div class="panel title-panel">
+    <img class="title-snowman" src="assets/snowman-front.webp" alt="">
+    <div class="logo-sub">5학년 2학기 · 직육면체</div>
+    <h1 class="logo">❄️ 눈뭉치 수학 대작전 ❄️</h1>
+    <p class="story">상자 눈괴물들이 눈사람 마을로 몰려와요!<br>눈총으로 괴물을 막고, 수학 문제를 풀어 힘을 얻으세요.</p>
+    <button class="big-btn" id="btn-start">시작하기 ▶</button>
+    <div class="how">
+      <div><span class="k">↔</span><b>이동</b> 마우스·손가락을 좌우로 움직이거나 ← → 키</div>
+      <div><span class="k">❄</span><b>발사</b> 눈총은 자동으로 쏴요. 괴물 앞으로 가서 서요!</div>
+      <div><span class="k">🛡</span><b>방어</b> 괴물이 빛나는 방어선을 넘으면 하트가 줄어요</div>
+      <div><span class="k">🎁</span><b>문제</b> 선물상자를 맞히거나 시간이 되면 나와요. 맞히면 보상!</div>
+    </div>
+  </div>
+</section>
+
+<!-- 이름 입력 -->
+<section id="screen-name" class="screen hidden">
+  <div class="panel">
+    <h2>이름을 알려 주세요</h2>
+    <p class="hint">랭킹에 이 이름으로 기록돼요. (예: 12번 김눈송)</p>
+    <input id="name-input" maxlength="14" placeholder="번호와 이름" autocomplete="off">
+    <button class="big-btn" id="btn-name">확인</button>
+  </div>
+</section>
+
+<!-- 차시 선택 -->
+<section id="screen-lessons" class="screen hidden">
+  <div class="panel wide">
+    <div class="row-between">
+      <h2>차시를 골라요</h2>
+      <div class="who">👤 <span id="who-name"></span> <button class="link-btn" id="btn-rename">바꾸기</button></div>
+    </div>
+    <div id="conn-msg" class="conn-msg hidden"></div>
+    <div id="lesson-grid" class="lesson-grid"></div>
+    <div class="row-between foot">
+      <button class="small-btn" id="btn-refresh">🔄 새로고침</button>
+      <span class="hint">🔒 잠긴 차시는 선생님이 열어 주시면 할 수 있어요.</span>
+    </div>
+  </div>
+</section>
+
+<!-- 게임 중 정보 -->
+<div id="hud" class="hidden">
+  <div class="hud-left">
+    <div id="hud-lives" class="lives"></div>
+    <div class="hud-chip">⭐ <span id="hud-score">0</span></div>
+    <div class="hud-chip">📈 난이도 <span id="hud-wave">1</span></div>
+  </div>
+  <div class="hud-mid">
+    <div class="quiz-timer"><span>다음 문제</span><div class="bar"><div id="hud-quizbar"></div></div></div>
+    <div id="hud-powers" class="powers"></div>
+  </div>
+  <div class="hud-right">
+    <button class="icon-btn" id="btn-sound" title="소리">🔊</button>
+    <button class="icon-btn" id="btn-pause" title="잠깐 멈춤">⏸</button>
+  </div>
+</div>
+
+<!-- 카운트다운 -->
+<div id="countdown" class="hidden"></div>
+
+<!-- 일시정지 -->
+<section id="screen-pause" class="screen dim hidden">
+  <div class="panel">
+    <h2>잠깐 멈춤 ⏸</h2>
+    <button class="big-btn" id="btn-resume">계속하기 ▶</button>
+    <button class="small-btn" id="btn-quit">그만하고 나가기</button>
+  </div>
+</section>
+
+<!-- 문제 창 -->
+<section id="quiz" class="screen dim hidden">
+  <div id="quiz-card" class="panel quiz-card"></div>
+</section>
+
+<!-- 게임 끝 -->
+<section id="screen-over" class="screen dim hidden">
+  <div class="panel wide">
+    <h2 class="over-title">기지가 눈에 파묻혔어요! ☃️</h2>
+    <div class="result">
+      <div class="res-item"><div class="res-label">점수</div><div class="res-val" id="res-score">0</div></div>
+      <div class="res-item"><div class="res-label">도달한 난이도</div><div class="res-val" id="res-wave">1</div></div>
+      <div class="res-item"><div class="res-label">맞힌 문제</div><div class="res-val" id="res-acc">0/0</div></div>
+      <div class="res-item"><div class="res-label">잡은 괴물</div><div class="res-val" id="res-kills">0</div></div>
+    </div>
+    <div id="res-breakdown" class="breakdown hidden"></div>
+    <div id="save-msg" class="save-msg"></div>
+    <h3 id="rank-title">🏆 랭킹</h3>
+    <div id="rank-list" class="rank-list"></div>
+    <div class="row-center">
+      <button class="big-btn" id="btn-again">다시 하기 ↻</button>
+      <button class="small-btn" id="btn-home">차시 고르기</button>
+    </div>
+  </div>
+</section>
+
+<!-- 랭킹 보기 -->
+<section id="screen-rank" class="screen dim hidden">
+  <div class="panel wide">
+    <h2 id="rank2-title">🏆 랭킹</h2>
+    <div id="rank2-list" class="rank-list"></div>
+    <div class="row-center"><button class="big-btn" id="btn-rank-close">닫기</button></div>
+  </div>
+</section>
+
+<div id="test-badge" class="test-badge hidden">테스트 모드 (이 기기에만 저장)</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="js/config.js?v=16"></script>
+<script src="js/api.js?v=16"></script>
+<script src="js/game.js?v=16"></script>
+<script src="js/figures.js?v=16"></script>
+<script src="js/sketch.js?v=16"></script>
+<script src="js/nets.js?v=16"></script>
+<script src="js/problems.js?v=16"></script>
+<script src="js/quiz.js?v=16"></script>
+<script src="js/app.js?v=16"></script>
+</body>
+</html>
