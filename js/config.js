@@ -2,7 +2,7 @@
 // API_URL: Apps Script 웹 앱 주소(…/exec). 비워 두면 "테스트 모드"로 동작합니다.
 //          (테스트 모드에서는 이 기기 안에만 기록되고, 교사 비밀번호는 snow1234)
 window.APP_CONFIG = {
-  API_URL: '',
+  API_URL: 'https://script.google.com/macros/s/AKfycbyU36gQuwbWy4b8EJD0z0577j6PP6BPTsy_zc0QiD1q4bcnHFEzt5eHYmQShr-NYlCMiA/exec',
   QUIZ_INTERVAL: 25,   // 몇 초마다 문제가 나올지
   START_LIVES: 3,
   MAX_LIVES: 5,
